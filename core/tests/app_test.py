@@ -8,6 +8,7 @@ import os
 import os.path as op
 import logging
 
+import pytest
 from pytest import mark
 from hscommon.path import Path
 import hscommon.conflict
@@ -119,8 +120,9 @@ class TestCaseDupeGuru:
         assert not dgapp.result_table.rename_selected('foo') # no crash
 
 class TestCaseDupeGuru_clean_empty_dirs:
-    def pytest_funcarg__do_setup(self, request):
-        monkeypatch = request.getfuncargvalue('monkeypatch')
+    @pytest.fixture
+    def do_setup(self, request):
+        monkeypatch = request.getfixturevalue('monkeypatch')
         monkeypatch.setattr(hscommon.util, 'delete_if_empty', log_calls(lambda path, files_to_delete=[]: None))
         # XXX This monkeypatch is temporary. will be fixed in a better monkeypatcher.
         monkeypatch.setattr(app, 'delete_if_empty', hscommon.util.delete_if_empty)
@@ -157,7 +159,8 @@ class TestCaseDupeGuru_clean_empty_dirs:
 
 
 class TestCaseDupeGuruWithResults:
-    def pytest_funcarg__do_setup(self, request):
+    @pytest.fixture
+    def do_setup(self, request):
         app = TestApp()
         self.app = app.app
         self.objects, self.matches, self.groups = GetTestGroups()
@@ -166,7 +169,7 @@ class TestCaseDupeGuruWithResults:
         self.dtree = app.dtree
         self.rtable = app.rtable
         self.rtable.refresh()
-        tmpdir = request.getfuncargvalue('tmpdir')
+        tmpdir = request.getfixturevalue('tmpdir')
         tmppath = Path(str(tmpdir))
         tmppath['foo'].mkdir()
         tmppath['bar'].mkdir()
@@ -408,8 +411,9 @@ class TestCaseDupeGuruWithResults:
 
 
 class TestCaseDupeGuru_renameSelected:
-    def pytest_funcarg__do_setup(self, request):
-        tmpdir = request.getfuncargvalue('tmpdir')
+    @pytest.fixture
+    def do_setup(self, request):
+        tmpdir = request.getfixturevalue('tmpdir')
         p = Path(str(tmpdir))
         fp = open(str(p['foo bar 1']), mode='w')
         fp.close()
@@ -471,8 +475,9 @@ class TestCaseDupeGuru_renameSelected:
 
 
 class TestAppWithDirectoriesInTree:
-    def pytest_funcarg__do_setup(self, request):
-        tmpdir = request.getfuncargvalue('tmpdir')
+    @pytest.fixture
+    def do_setup(self, request):
+        tmpdir = request.getfixturevalue('tmpdir')
         p = Path(str(tmpdir))
         p['sub1'].mkdir()
         p['sub2'].mkdir()

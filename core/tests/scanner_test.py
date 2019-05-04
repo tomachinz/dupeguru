@@ -13,6 +13,7 @@ from ..engine import getwords, Match
 from ..ignore import IgnoreList
 from ..scanner import Scanner, ScanType
 from ..me.scanner import ScannerME
+import pytest
 
 class NamedObject:
     def __init__(self, name="foobar", size=1, path=None):
@@ -31,10 +32,11 @@ class NamedObject:
 
 no = NamedObject
 
-def pytest_funcarg__fake_fileexists(request):
+@pytest.fixture
+def fake_fileexists(request):
     # This is a hack to avoid invalidating all previous tests since the scanner started to test
     # for file existence before doing the match grouping.
-    monkeypatch = request.getfuncargvalue('monkeypatch')
+    monkeypatch = request.getfixturevalue('monkeypatch')
     monkeypatch.setattr(Path, 'exists', lambda _: True)
 
 def test_empty(fake_fileexists):
